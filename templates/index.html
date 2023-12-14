@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pickup Line Generator</title>
+    <style>
+        label {
+        display: block;
+        margin-top: 20px;
+        color: #333;
+        font-size: 16px;
+        }
+    
+        select {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            color: white; /* Change text color to improve contrast */
+            margin: 0; /* Remove default margin */
+            height: 100%; /* Ensure full height */
+            overflow: hidden; /* Prevent scrolling */
+        }
+        .background-overlay {
+            /* Full-screen overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('../static/background.png') no-repeat center center/cover; 
+            z-index: -1; /* Ensure the overlay is behind the content */
+
+            /* Darkening effect */
+            background-color: rgba(0, 0, 0, 0.5); /* Adjust the alpha for more/less darkness */
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white; /* Ensure readability */
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p {
+            margin-top: 20px;
+            color: #000000;
+            background-color: white;
+            border-radius: 2px;
+            padding: 20px;
+        }
+        a {
+            color: black;
+            text-decoration: none;
+            transition: letter-spacing 0.3s ease, color 0.3s ease;
+            position: relative; /* Needed for the pseudo-element positioning */
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+
+        a:hover {
+            letter-spacing: 2px;
+            color: #333;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px; /* Adjust this value as needed */
+            height: 2px; /* Height of the outline */
+            background: black; /* Color of the outline */
+            border-radius: 0 0 10px 10px; /* Rounded corners at the bottom */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        a:hover::after {
+            opacity: 1; /* Show the pseudo-element on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div> <!-- Overlay for darkening the background -->
+    <h1>BYU-themed Pickup Line Generator</h1>
+    <form action="/" method="post">
+        <input type="text" name="custom_prompt" placeholder="Include a theme (optional)">
+        <button type="submit">Generate Pickup Line</button>
+    </form>
+    <form action="/save" method="post">
+        <input type="hidden" name="pickup_line_to_save" value="{{ pickup_line }}">
+        <button type="submit">Save Pickup Line</button>
+    </form>
+    <a href="../static/pickup_lines.txt">view saved pickup lines</a>
+    <p id="pickupLine">{{ pickup_line }}</p>
+    <form action="/rate" method="post">
+        <input type="hidden" name="pickup_line_to_rate" value="{{ pickup_line }}">
+        <label for="rating">Rate this pickup line:</label>
+        <select name="rating" id="rating">
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+        </select>
+        <button type="submit">Submit Rating</button>
+    </form>
+    <!-- <button onclick="speakPickupLine()">Read Pickup Line</button>    -->
+    <form action="/delete" method="post">
+        <button type="submit">Delete Saved Pickup Lines</button>
+    </form>
+    <button onclick="readPickupLine('echo')">Read with Man Voice</button>
+    <button onclick="readPickupLine('shimmer')">Read with Girl Voice</button>
+    <button onclick="readPickupLine('fable')">Read with British person</button>
+
+    <script>
+        function readPickupLine(voice) {
+            var pickupLine = document.getElementById('pickupLine').innerText;
+            fetch('/generate_speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'text=' + encodeURIComponent(pickupLine) + '&voice=' + voice
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                var url = window.URL.createObjectURL(blob);
+                var audio = new Audio(url);
+                audio.play();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script> 
+</body>
+</html>
